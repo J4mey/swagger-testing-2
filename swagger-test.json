@@ -10,7 +10,13 @@ basePath: /api/v1
 produces:
   - application/json
 security:
-  - api_key: [ZS1DSGFDaGJZOVVfUlVPSmJPdFR6SmNJTnNadjN0U3NDQi05VUwxeXBFSTE1]
+  - api_key: []
+  $('#input_apiKey').change(function() {
+  var key = $('#input_apiKey')[0].value;
+  if(key && key.trim() != "") {
+    swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("api_key", key, "header"));
+  }
+})
 paths:
   /contact/search:
     post:
