@@ -10,7 +10,7 @@ basePath: /api/v1
 produces:
   - application/json
 security:
-  - api_key: []
+  - api_key: [ZS1DSGFDaGJZOVVfUlVPSmJPdFR6SmNJTnNadjN0U3NDQi05VUwxeXBFSTE1]
 paths:
   /contact/search:
     post:
