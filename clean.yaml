@@ -138,9 +138,11 @@ paths:
         - Tags
       responses:
         '200':
-          description: successfully returned tags
+          description: Array of 1 or more contacts
           schema:
-            $ref: '#/definitions/Error'
+           type: array
+           items:
+            $ref: '#/definitions/Tag'
     post:
       parameters:
         - name: email_address_or_contact_ID
@@ -153,24 +155,20 @@ paths:
           description: User needs to specify either id or name of the Tag that needs to be added to the Contact
           required: true
           schema:
-            $ref: '#/definitions/Contact'
+           type: array
+           items:
+            $ref: '#/definitions/TagRequest'
       summary: Add tags to a specific contact
       description: Add tags to a specific contact
       tags:
         - Tags
       responses:
         '201':
-          description: Successfully created tags
-          schema:
-            $ref: '#/definitions/Error'
+          description: Tag(s) added
         '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
+          description: Bad Request - Not found or invalid parameters
         '405':
           description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/Error'
     delete:
       parameters:
         - name: email_address_or_contact_ID
@@ -183,25 +181,21 @@ paths:
           description: User needs to specify either id or name of the Tag that needs to be deleted for the Contact.
           required: true
           schema:
-            $ref: '#/definitions/Contact'
+           type: array
+           items:
+            $ref: '#/definitions/TagRequest'
       summary: Delete tags from a specific contact
       description: Delete tags from a specific contact
       tags:
         - Tags
       responses:
         '201':
-          description: Successfully deleted tags
-          schema:
-            $ref: '#/definitions/Error'
+          description: Tag(s) deleted
         '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
+          description: Bad Request - Not found or invalid parameters
         '405':
           description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/Error'
-  '/contact/{email_address_or_contact_ID}/campaign':
+  /contact/{email_address_or_contact_ID}/campaign:
     get:
       parameters:
         - name: email_address_or_contact_ID
@@ -217,7 +211,9 @@ paths:
         '200':
           description: Successfully returned campaigns for contact
           schema:
-            $ref: '#/definitions/Error'
+           type: array
+           items:
+            $ref: '#/definitions/Campaign'
     post:
       parameters:
         - name: email_address_or_contact_ID
@@ -230,24 +226,20 @@ paths:
           description: User needs to specify either Campaign ID or name of the Campaign that needs to be started for the Contact
           required: true
           schema:
-            $ref: '#/definitions/Contact'
+           type: array
+           items:
+            $ref: '#/definitions/CampaignRequest'
       summary: Start campaign for a specific contact
       description: Start campaign for a specific contact
       tags:
         - Campaigns
       responses:
         '201':
-          description: Successfully started campaign
-          schema:
-            $ref: '#/definitions/Error'
+          description: Campaign Started
         '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
+          description: Bad Request - Not found, invalid parameters or campaign already running for contact
         '405':
           description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/Error'
     delete:
       parameters:
         - name: email_address_or_contact_ID
@@ -260,24 +252,20 @@ paths:
           description: User needs to specify either Campaign ID or name of the Campaign that needs to be stopped for the Contact.
           required: true
           schema:
-            $ref: '#/definitions/Contact'
+           type: array
+           items:
+            $ref: '#/definitions/CampaignRequest'
       summary: Stop campaign for a specific contact
       description: Stop campaign for a specific contact
       tags:
         - Campaigns
       responses:
         '201':
-          description: Successfully stopped campaign
-          schema:
-            $ref: '#/definitions/Error'
+          description: Campaign Stopped
         '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
+          description: Bad Request - Not found or invalid parameters
         '405':
           description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/Error'
   /contact/order:
     post:
       summary: Create a new purchase order
@@ -290,7 +278,7 @@ paths:
           description: Required fields are emailAddress, marketingOptInInd, orderType, and status. Phones are required when creating a new user. 
           required: true
           schema:
-            $ref: '#/definitions/Contact'
+            $ref: '#/definitions/PurchaseOrder'
       tags:
         - Purchase Order
       responses:
@@ -299,17 +287,11 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
+          description: Bad Request - Not found or invalid parameters
         '405':
           description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/Error' 
         '500':
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/Error'    
 securityDefinitions:
   api_key:
     type: apiKey
@@ -323,10 +305,10 @@ definitions:
         description: Unique identifier for contacts.
       firstName:
         type: string
-        description: Description of product.
+        description: "contact's first name"
       lastName:
         type: string
-        description: Display name of product.
+        description: "contact's last name"
       emails:
         type: array
         items:
@@ -542,10 +524,18 @@ definitions:
       score:
         type: number
         description: current tag score
+  TagRequest:
+    properties:
+      id:
+        type: string
+        description: system id of the tag
+      name:
+        type: string
+        description: name of tag    
   Campaign:
     properties:
       id:
-        type: number
+        type: string
         description: unique id of campaign
       name:
         type: string
@@ -553,6 +543,14 @@ definitions:
       step:
         type: number
         description: campaign step the contact is currently on
+  CampaignRequest:
+   properties:  
+      id:
+        type: string
+        description: unique id of campaign
+      name:
+        type: string
+        description: name of campaign  
   StreetAddress:
     properties:
       id:
@@ -669,3 +667,49 @@ definitions:
     properties:
       message:
         type: string
+  PurchaseOrder:
+   properties:
+    marketingOptInInd:
+     type: string
+     description: "Required - Must be true or false"
+    firstName:
+      type: string
+      description: "Optional, only used if contact doesn't exist"
+    externalOrderId:
+     type: number
+     description: "Optional, correlates to the order id in your source system"
+    email:
+     type: string
+     description: "Required, used to find or create contact"
+    lastName:
+      type: string
+      description: "Optional, only used if contact doesn't exist"
+    orderLineItem:
+      type: array
+      description: "At least one required, all fields required"
+      items:
+        $ref: '#/definitions/OrderLineItem'
+    phones:
+      type: array
+      description: "Optional, however number and type required if included, only used when creating contact"
+      items:
+        $ref: '#/definitions/Phone'
+    status:
+      type: object
+      description: "Required, must be a valid contact status from your company settings"
+      $ref: '#/definitions/ContactStatus'        
+  OrderLineItem:
+   properties:
+    quantity:
+     type: number
+     description: "Quantity of items being purchased"
+    pricePerUnit:
+     type: number
+     description: "Price of item"
+    productName:
+     type: string
+     description: "System will create product if not found"
+    categoryName:
+     type: string
+     description: "System will create category if product not already assigned to one"
+     
